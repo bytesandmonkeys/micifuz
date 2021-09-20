@@ -5,6 +5,7 @@ import static org.hamcrest.Matchers.is;
 
 import java.util.concurrent.TimeUnit;
 
+import com.micifuz.commons.Runner;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
@@ -27,8 +28,16 @@ public class SimpleTest {
     static String deploymentId;
 
     @BeforeAll
-    static void beforeAll(Vertx vertx) {
-        deploymentId = Main.start(vertx, new DeploymentOptions()).result();
+    static void beforeAll(Vertx vertx, VertxTestContext testContext) {
+        Runner.start(vertx, MainVerticle.class.getName())
+                .onFailure(err ->{
+                    err.printStackTrace();
+                })
+              .onComplete(res -> {
+                  deploymentId = res.result();
+                  System.out.println(deploymentId);
+                  testContext.completeNow();
+              });
     }
 
     @AfterAll
@@ -39,11 +48,11 @@ public class SimpleTest {
     @Test
     void should_simplyWork() {
         RestAssured.given()
-                .port(AUTHN_PORT)
-                .when().get("/hello")
-                .then()
-                .statusCode(200)
-                .body("hello", is("world: authN"));
+                   .port(AUTHN_PORT)
+                   .when().get("/hello")
+                   .then()
+                   .statusCode(200)
+                   .body("hello", is("world: authN"));
     }
 
     @Test
@@ -52,9 +61,9 @@ public class SimpleTest {
         HttpClient client = vertx.createHttpClient();
 
         client.request(HttpMethod.GET, AUTHN_PORT, AUTHN_HOST, "/health").compose(req -> req.send()
-                .onComplete(testContext.succeeding(httpResp -> testContext.verify(() -> {
-                    assertThat(httpResp.statusCode(), is(200));
-                    testContext.completeNow();
-                }))));
+                                                                                            .onComplete(testContext.succeeding(httpResp -> testContext.verify(() -> {
+                                                                                                assertThat(httpResp.statusCode(), is(200));
+                                                                                                testContext.completeNow();
+                                                                                            }))));
     }
 }
