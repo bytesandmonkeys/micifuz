@@ -1,23 +1,22 @@
 package com.micifuz.shelters;
 
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.is;
-
-import java.util.concurrent.TimeUnit;
-
-import org.junit.jupiter.api.AfterAll;
-import org.junit.jupiter.api.BeforeAll;
-import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
-
+import com.micifuz.commons.Runner;
 import io.restassured.RestAssured;
-import io.vertx.core.DeploymentOptions;
 import io.vertx.core.Vertx;
 import io.vertx.core.http.HttpClient;
 import io.vertx.core.http.HttpMethod;
 import io.vertx.junit5.Timeout;
 import io.vertx.junit5.VertxExtension;
 import io.vertx.junit5.VertxTestContext;
+import org.junit.jupiter.api.AfterAll;
+import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+
+import java.util.concurrent.TimeUnit;
+
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.is;
 
 @ExtendWith(VertxExtension.class)
 public class SimpleTest {
@@ -26,8 +25,14 @@ public class SimpleTest {
     static String deploymentId;
 
     @BeforeAll
-    static void beforeAll(Vertx vertx) {
-        deploymentId = Main.start(vertx, new DeploymentOptions()).result();
+    static void beforeAll(Vertx vertx, VertxTestContext testContext) {
+        Runner.start(vertx, SheltersMainVerticle.class.getName())
+              .onFailure(Throwable::printStackTrace)
+              .onComplete(res -> {
+                  deploymentId = res.result();
+                  System.out.println(deploymentId);
+                  testContext.completeNow();
+              });
     }
 
     @AfterAll

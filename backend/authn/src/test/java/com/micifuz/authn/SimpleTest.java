@@ -1,24 +1,22 @@
 package com.micifuz.authn;
 
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.is;
-
-import java.util.concurrent.TimeUnit;
-
 import com.micifuz.commons.Runner;
-import org.junit.jupiter.api.AfterAll;
-import org.junit.jupiter.api.BeforeAll;
-import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
-
 import io.restassured.RestAssured;
-import io.vertx.core.DeploymentOptions;
 import io.vertx.core.Vertx;
 import io.vertx.core.http.HttpClient;
 import io.vertx.core.http.HttpMethod;
 import io.vertx.junit5.Timeout;
 import io.vertx.junit5.VertxExtension;
 import io.vertx.junit5.VertxTestContext;
+import org.junit.jupiter.api.AfterAll;
+import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+
+import java.util.concurrent.TimeUnit;
+
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.is;
 
 @ExtendWith(VertxExtension.class)
 public class SimpleTest {
@@ -29,10 +27,8 @@ public class SimpleTest {
 
     @BeforeAll
     static void beforeAll(Vertx vertx, VertxTestContext testContext) {
-        Runner.start(vertx, MainVerticle.class.getName())
-                .onFailure(err ->{
-                    err.printStackTrace();
-                })
+        Runner.start(vertx, AuthMainVerticle.class.getName())
+                .onFailure(Throwable::printStackTrace)
               .onComplete(res -> {
                   deploymentId = res.result();
                   System.out.println(deploymentId);
