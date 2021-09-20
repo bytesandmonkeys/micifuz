@@ -25,6 +25,7 @@ java_library(
     visibility = ["//visibility:public"],
     deps = [
         "//backend/commons:deps",
+        "//backend/tests-resources:deps",
         ":deps",
         "@mockito//:org_mockito_mockito_core",
         "@mockito//:org_mockito_mockito_junit_jupiter",

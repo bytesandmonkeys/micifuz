@@ -23,6 +23,7 @@ java_library(
     deps = [
         ":deps",
         "//backend/commons:deps",
+        "//backend/tests-resources:deps",
         "@mockito//:org_mockito_mockito_core",
         "@mockito//:org_mockito_mockito_junit_jupiter",
         "@vertx//:io_reactivex_rxjava2_rxjava",
