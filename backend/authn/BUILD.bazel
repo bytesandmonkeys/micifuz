@@ -18,15 +18,18 @@ java_library(
     ],
 )
 
-java_library(
-    name = "tests-deps",
+java_test(
+    name = "tests",
     srcs = glob(["**/src/test/java/**/*.java"]),
+    args = ["--select-package=com.micifuz"],
+    main_class = "org.junit.platform.console.ConsoleLauncher",
     resources = glob(["**/src/test/resources/**"]),
+    use_testrunner = False,
     visibility = ["//visibility:public"],
     deps = [
+        ":deps",
         "//backend/commons:deps",
         "//backend/tests-resources:deps",
-        ":deps",
         "@mockito//:org_mockito_mockito_core",
         "@mockito//:org_mockito_mockito_junit_jupiter",
         "@vertx//:io_reactivex_rxjava2_rxjava",
@@ -40,21 +43,7 @@ java_library(
         "@vertx_tests//:org_hamcrest_hamcrest_all",
         "@vertx_tests//:org_junit_jupiter_junit_jupiter_api",
         "@vertx_tests//:org_junit_platform_junit_platform_console",
-    ],
-)
-
-java_test(
-    name = "tests",
-    srcs = glob([
-        "*.java",
-    ]),
-    args = ["--select-package=com.micifuz"],
-    main_class = "org.junit.platform.console.ConsoleLauncher",
-    use_testrunner = False,
-    visibility = ["//visibility:public"],
-    runtime_deps = [
-        ":tests-deps",
-    ],
+    ]
 )
 
 java_binary(
