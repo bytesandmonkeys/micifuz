@@ -35,23 +35,18 @@ load(
 
 container_repositories()
 
-load(
-    "@io_bazel_rules_docker//java:image.bzl",
-    _java_image_repos = "repositories",
-)
+load("@io_bazel_rules_docker//repositories:deps.bzl", container_deps = "deps")
 
-_java_image_repos()
+container_deps()
 
-load(
-    "@io_bazel_rules_docker//container:container.bzl",
-    "container_pull",
-    "container_image",
-    "container_push",
-)
+load("@io_bazel_rules_docker//container:container.bzl", "container_pull")
 
+# Examine https://console.cloud.google.com/gcr/images/distroless/GLOBAL/java?gcrImageListsize=30 to find
+# the latest version when updating
 container_pull(
-    name = "openjdk",
-    registry = "registry.hub.docker.com",
-    repository = "library/openjdk",
-    digest = "sha256:31e765618b9d37e3e73aab362f5b867729007d87f473d26a1aa0a789a1cfea21",
+    name = "java11",
+    # This pulls the java 11 version of the java base image
+    digest = "sha256:5b4bb0f378489f8b15547d79844a9e7b5343539051d99942f414872e380124a2",
+    registry = "gcr.io",
+    repository = "distroless/java",
 )

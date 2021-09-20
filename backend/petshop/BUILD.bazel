@@ -36,7 +36,7 @@ java_binary(
 
 container_image(
     name = "container",
-    base = "@openjdk//image",
+    base = "@java11//image",
     cmd = [
         "java",
         "-jar",
