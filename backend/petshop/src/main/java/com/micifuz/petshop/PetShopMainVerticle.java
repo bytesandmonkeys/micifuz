@@ -27,9 +27,10 @@ public class PetShopMainVerticle extends AbstractVerticle {
         Single<Integer> serverPort = ConfigManager.getInstance(vertx).resolveProperty("server.port", PORT);
         Single<Router> serverRouter = IoC.getInstance().getRouting().createRouter();
 
-        return serverRouter.zipWith(serverPort, this::startHttpServer)
+        return IoC.getInstance().getRedisClient().init()
+            .andThen(serverRouter.zipWith(serverPort, this::startHttpServer)
                 .doOnError(LOGGER::error)
-                .flatMapCompletable(started -> started);
+                .flatMapCompletable(started -> started));
     }
 
     private Completable startHttpServer(Router router, Integer port) {

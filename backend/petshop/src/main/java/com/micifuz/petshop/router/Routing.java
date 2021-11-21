@@ -11,6 +11,8 @@ public class Routing {
     private static final String HEALTH_CHECK = "/health";
     private static final String HELLO = "/hello";
     private static final String ROOT = "/";
+    private static final String REDIS_KEY = "/redis/:key";
+    private static final String REDIS_SET = "/redis/:key/:value";
 
     public Single<Router> createRouter() {
         Router router = Router.router(Vertx.currentContext().owner());
@@ -18,6 +20,8 @@ public class Routing {
         router.get(ROOT).handler(IoC.getInstance().getHelloHandler()::execute);
         router.get(HELLO).handler(IoC.getInstance().getHelloHandler()::execute);
         router.get(HEALTH_CHECK).handler(IoC.getInstance().getHealthCheck());
+        router.get(REDIS_KEY).handler(IoC.getInstance().getRedisHandler()::execute);
+        router.get(REDIS_SET).handler(IoC.getInstance().getRedisHandler()::set);
         return Single.just(router);
     }
 }

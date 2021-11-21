@@ -2,6 +2,8 @@ package com.micifuz.petshop.ioc;
 
 import com.micifuz.petshop.handlers.HealthChecks;
 import com.micifuz.petshop.handlers.HelloHandler;
+import com.micifuz.petshop.handlers.RedisBasicHandler;
+import com.micifuz.petshop.redis.RedisClient;
 import com.micifuz.petshop.router.Routing;
 
 import io.vertx.reactivex.core.Vertx;
@@ -12,6 +14,8 @@ public class IoC {
     private final Routing routing;
     private final HelloHandler helloHandler;
     private final HealthCheckHandler healthCheckHandler;
+    private final RedisClient redisClient;
+    private final RedisBasicHandler redisHandler;
     private static IoC instance = null;
 
     public static synchronized IoC getInstance() {
@@ -27,6 +31,8 @@ public class IoC {
         HealthChecks healthCheckHealthChecks = new HealthChecks(vertx);
         healthCheckHandler = healthCheckHealthChecks.getHealthCheckHandler();
         helloHandler = new HelloHandler();
+        redisClient = new RedisClient();
+        redisHandler = new RedisBasicHandler(redisClient);
     }
 
     public Routing getRouting() {
@@ -39,5 +45,13 @@ public class IoC {
 
     public HealthCheckHandler getHealthCheck() {
         return healthCheckHandler;
+    }
+
+    public RedisClient getRedisClient() {
+        return redisClient;
+    }
+
+    public RedisBasicHandler getRedisHandler() {
+        return redisHandler;
     }
 }
