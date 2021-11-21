@@ -18,6 +18,11 @@
             <groupId>com.micifuz</groupId>
             <artifactId>commons</artifactId>
         </dependency>
+        <dependency>
+            <groupId>io.vertx</groupId>
+            <artifactId>vertx-redis-client</artifactId>
+            <version>4.2.1</version>
+        </dependency>
         <!-- Test resources -->
         <dependency>
             <groupId>com.micifuz</groupId>
