@@ -4,6 +4,7 @@ import io.reactivex.Completable;
 import io.reactivex.Maybe;
 import io.vertx.core.logging.Logger;
 import io.vertx.core.logging.LoggerFactory;
+import io.vertx.core.net.NetClientOptions;
 import io.vertx.reactivex.core.Vertx;
 import io.vertx.reactivex.redis.client.Command;
 import io.vertx.reactivex.redis.client.Redis;
@@ -34,6 +35,8 @@ public class RedisClient {
 
     return Redis.createClient(Vertx.currentContext().owner(), new RedisOptions()
             .setConnectionString(String.format("redis://%s:%d", host, port))
+            .setNetClientOptions(
+                new NetClientOptions().setTcpNoDelay(true).setTcpKeepAlive(true).setSsl(true))
             .setMaxPoolSize(300))
         .send(Request.cmd(Command.AUTH).arg(username).arg(password), r -> {
           LOGGER.info("result : " + r.result());
