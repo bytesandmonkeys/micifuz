@@ -19,7 +19,7 @@ public class RedisBasicHandler {
   }
 
   /**
-   *  execute.
+   * execute.
    */
   public void execute(RoutingContext context) {
     String key = context.pathParam("key");
