@@ -14,22 +14,26 @@
         <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
         <compiler-plugin.version>3.8.1</compiler-plugin.version>
         <surefire-plugin.version>2.22.2</surefire-plugin.version>
-        <formatter-maven-plugin.version>2.16.0</formatter-maven-plugin.version>
+        <formatter-maven-plugin.version>2.17.0</formatter-maven-plugin.version>
         <impsort-maven-plugin.version>1.6.2</impsort-maven-plugin.version>
         <xml-format-maven-plugin.version>3.2.0</xml-format-maven-plugin.version>
-        <checkstyle.version>9.0.1</checkstyle.version>
+        <checkstyle.version>9.1</checkstyle.version>
         <src.format.goal>format</src.format.goal>
         <src.sort.goal>sort</src.sort.goal>
         <xml.format.goal>xml-format</xml.format.goal>
         <maven-checkstyle-plugin.version>3.1.2</maven-checkstyle-plugin.version>
-        <include.tests>**/*IT.java</include.tests>
+        <include.tests>**/*Test.java</include.tests>
         <commons-logging.version>1.2</commons-logging.version>
-        <quarkus.version>2.3.0.Final</quarkus.version>
+        <quarkus.platform.version>2.5.0.Final</quarkus.platform.version>
         <main.verticle>replaced_in_modules</main.verticle>
         <maven-shade-plugin.version>3.2.4</maven-shade-plugin.version>
         <exec-maven-plugin.version>3.0.0</exec-maven-plugin.version>
-        <quarkus-plugin.version>${quarkus.version}</quarkus-plugin.version>
-        <testcontainers.version>1.16.0</testcontainers.version>
+        <quarkus-plugin.version>${quarkus.platform.version}</quarkus-plugin.version>
+        <vertx-mutiny-generator.version>2.14.2</vertx-mutiny-generator.version>
+        <testcontainers.version>1.16.2</testcontainers.version>
+        <jacoco-maven-plugin.version>0.8.7</jacoco-maven-plugin.version>
+        <!-- Code Coverage Properties-->
+        <jacoco.agent.argLine/>
     </properties>
     <dependencyManagement>
         <dependencies>
@@ -37,7 +41,7 @@
             <dependency>
                 <groupId>io.quarkus</groupId>
                 <artifactId>quarkus-bom</artifactId>
-                <version>${quarkus.version}</version>
+                <version>${quarkus.platform.version}</version>
                 <type>pom</type>
                 <scope>import</scope>
             </dependency>
@@ -59,6 +63,11 @@
                 <artifactId>test-resources</artifactId>
                 <version>${project.version}</version>
                 <scope>test</scope>
+            </dependency>
+            <dependency>
+                <groupId>io.smallrye.reactive</groupId>
+                <artifactId>vertx-mutiny-generator</artifactId>
+                <version>${vertx-mutiny-generator.version}</version>
             </dependency>
         </dependencies>
     </dependencyManagement>
@@ -110,6 +119,11 @@
     <build>
         <pluginManagement>
             <plugins>
+                <plugin>
+                    <groupId>org.jacoco</groupId>
+                    <artifactId>jacoco-maven-plugin</artifactId>
+                    <version>${jacoco-maven-plugin.version}</version>
+                </plugin>
                 <plugin>
                     <artifactId>maven-surefire-plugin</artifactId>
                     <version>${surefire-plugin.version}</version>
@@ -197,10 +211,41 @@
             <plugin>
                 <artifactId>maven-surefire-plugin</artifactId>
                 <configuration>
+                    <argLine>${jacoco.agent.argLine}</argLine>
                     <systemPropertyVariables>
                         <keycloak.15.image>quay.io/keycloak/keycloak:15.0.2</keycloak.15.image>
                     </systemPropertyVariables>
                 </configuration>
+            </plugin>
+            <plugin>
+                <groupId>org.bsc.maven</groupId>
+                <artifactId>maven-processor-plugin</artifactId>
+                <version>4.5-jdk8</version>
+                <configuration>
+                    <systemProperties>
+                        <java.util.logging.SimpleFormatter.format>%4$s: %3$s - %5$s %6$s%n</java.util.logging.SimpleFormatter.format>
+                        <mvel2.disable.jit>true</mvel2.disable.jit>
+                    </systemProperties>
+                </configuration>
+                <executions>
+                    <!-- Run the annotation processor on java sources and generate the API -->
+                    <execution>
+                        <id>generate-api</id>
+                        <goals>
+                            <goal>process</goal>
+                        </goals>
+                        <phase>generate-sources</phase>
+                        <configuration>
+                            <sourceDirectory>${project.build.directory}/sources/java</sourceDirectory>
+                            <processors>
+                                <processor>io.vertx.codegen.CodeGenProcessor</processor>
+                            </processors>
+                            <optionMap>
+                                <codegen.generators>mutiny</codegen.generators>
+                            </optionMap>
+                        </configuration>
+                    </execution>
+                </executions>
             </plugin>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
@@ -209,6 +254,9 @@
                 <configuration>
                     <source>${maven.compiler.source}</source>
                     <target>${maven.compiler.target}</target>
+                    <annotationProcessors>
+                        <annotationProcessor>io.vertx.codegen.CodeGenProcessor</annotationProcessor>
+                    </annotationProcessors>
                 </configuration>
             </plugin>
             <plugin>
@@ -311,6 +359,35 @@
         </repository>
     </repositories>
     <profiles>
+        <profile>
+            <id>coverage</id>
+            <properties>
+                <!--suppress UnresolvedMavenProperty to ignore warnings in idea-->
+                <jacoco.agent.argLine>${jacoco.generated.agent.argLine}</jacoco.agent.argLine>
+            </properties>
+            <build>
+                <plugins>
+                    <plugin>
+                        <groupId>org.jacoco</groupId>
+                        <artifactId>jacoco-maven-plugin</artifactId>
+                        <executions>
+                            <execution>
+                                <id>agent</id>
+                                <goals>
+                                    <goal>prepare-agent</goal>
+                                </goals>
+                                <configuration>
+                                    <includes>
+                                        <include>com.micifuz.*</include>
+                                    </includes>
+                                    <propertyName>jacoco.generated.agent.argLine</propertyName>
+                                </configuration>
+                            </execution>
+                        </executions>
+                    </plugin>
+                </plugins>
+            </build>
+        </profile>
         <profile>
             <id>authn</id>
             <activation>
