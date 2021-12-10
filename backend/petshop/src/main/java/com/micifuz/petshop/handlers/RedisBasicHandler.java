@@ -18,9 +18,6 @@ public class RedisBasicHandler {
     this.redisClient = redisClient;
   }
 
-  /**
-   *  execute.
-   */
   public void execute(RoutingContext context) {
     String key = context.pathParam("key");
     context.response().putHeader("content-type", "application/json")
